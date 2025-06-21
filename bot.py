@@ -147,7 +147,6 @@ def main():
                     if abs(alert_value) > 100:
                         alert_id = f"{symbol}-{next_funding_time}"
                         if alert_id not in already_alerted:
-                            # FIXED, simple format: no emoji, all fields present
                             message = (
                                 f"ALERT: {symbol}\n"
                                 f"Funding Rate: {funding_rate:.4f}%\n"
@@ -168,8 +167,8 @@ def main():
 
             if not alert_triggered:
                 print("No alerts triggered this check")
-                # FIXED: No emoji, plain and fixed for trade bot compatibility
-                send_telegram_alert("NO LEAD FOUND")
+                # MENTION YOUR TRADE BOT USERNAME HERE
+                send_telegram_alert("@autofundingtradebot NO LEAD FOUND")
 
             print(f"Next check in {CHECK_INTERVAL//60} minutes...")
             time.sleep(CHECK_INTERVAL)
