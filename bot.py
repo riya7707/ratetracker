@@ -1,6 +1,4 @@
 import requests
-print("Your Railway Public IP is:", requests.get("https://api.ipify.org").text)
-import requests
 import time
 import datetime
 import sys
@@ -8,6 +6,8 @@ import hmac
 import hashlib
 import os
 from urllib.parse import urlencode
+
+print("Your Railway Public IP is:", requests.get("https://api.ipify.org").text)
 
 # Read secrets from environment variables (NO config.py)
 try:
@@ -96,8 +96,8 @@ def get_max_leverage(symbol):
         return None
 
 def main():
-    started_msg = "🤖 Binance Funding Rate Alert Bot started!\nChecking every 30 minutes."
-    stopped_msg = "🛑 Binance Funding Rate Alert Bot stopped."
+    started_msg = "Binance Funding Rate Alert Bot started! Checking every 30 minutes."
+    stopped_msg = "Binance Funding Rate Alert Bot stopped."
     send_telegram_alert(started_msg)
     print(started_msg)
 
@@ -114,7 +114,7 @@ def main():
             funding_data = get_funding_rates()
             if not funding_data:
                 print("No funding data received. Waiting for next check...")
-                send_telegram_alert("❗ No funding data received from Binance this check.")
+                send_telegram_alert("NO FUNDING DATA RECEIVED")
                 time.sleep(CHECK_INTERVAL)
                 continue
 
@@ -147,19 +147,19 @@ def main():
                     if abs(alert_value) > 100:
                         alert_id = f"{symbol}-{next_funding_time}"
                         if alert_id not in already_alerted:
+                            # FIXED, simple format: no emoji, all fields present
                             message = (
-                                f"🚨 <b>ALERT: {symbol}</b> 🚨\n"
-                                f"▫️ Funding Rate: <b>{funding_rate:.4f}%</b>\n"
-                                f"▫️ Max Leverage: <b>{max_leverage}x</b>\n"
-                                f"▫️ Value: <b>{alert_value:.2f}</b>\n"
-                                f"▫️ Funding in: <b>{minutes_left} minutes</b>\n"
-                                f"▫️ Next window: {next_funding.strftime('%H:%M:%S %Z')}\n\n"
-                                "<i>Trade Setup Time: ~50 minutes remaining</i>"
+                                f"ALERT: {symbol}\n"
+                                f"Funding Rate: {funding_rate:.4f}%\n"
+                                f"Max Leverage: {max_leverage}x\n"
+                                f"Next window: {next_funding.strftime('%H:%M:%S %Z')}\n"
+                                f"Value: {alert_value:.2f}\n"
+                                f"Funding in: {minutes_left} minutes\n"
                             )
                             send_telegram_alert(message)
                             already_alerted.add(alert_id)
                             alert_triggered = True
-                            print(f"  🔔 ALERT SENT FOR {symbol}")
+                            print(f"  ALERT SENT FOR {symbol}")
 
                 except KeyError as e:
                     print(f"  Error processing {symbol}: Missing data field {e}")
@@ -168,17 +168,18 @@ def main():
 
             if not alert_triggered:
                 print("No alerts triggered this check")
-                send_telegram_alert("❕ No lead found this check.")
+                # FIXED: No emoji, plain and fixed for trade bot compatibility
+                send_telegram_alert("NO LEAD FOUND")
 
             print(f"Next check in {CHECK_INTERVAL//60} minutes...")
             time.sleep(CHECK_INTERVAL)
 
     except KeyboardInterrupt:
-        print("\n🛑 Script stopped by user")
+        print("\nScript stopped by user")
         send_telegram_alert(stopped_msg)
     except Exception as e:
         print(f"Unexpected error: {e}")
-        send_telegram_alert("‼️ Bot crashed due to unexpected error. Restarting in 60 seconds...")
+        send_telegram_alert("BOT CRASHED. Restarting in 60 seconds...")
         time.sleep(60)
         main()
 
